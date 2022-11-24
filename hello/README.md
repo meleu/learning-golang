@@ -13,9 +13,9 @@
 - `t.Errorf` prints a message when a test fails.
 - `%q` means "string surrounded with double quotes", in the string format context
 - `func greetingPrefix(language string) (prefix string)` creates a **named return value**
-      - this creates a variable called `prefix` in the function
-          - it will be assigned the "zero" value. In this case (`string`): `""`
-- in Go, public functions start with a capital letter and private ones start with a lowercase.
+    - creates a variable called `prefix` in the function
+        - it will be assigned the "zero" value. In this case (`string`): `""`
+- in Go, `PublicFunctions` start with a capital letter and `privateFunctions` start with a lowercase.
 
 #### Few rules to writing tests
 
