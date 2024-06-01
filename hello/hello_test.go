@@ -1,8 +1,14 @@
 package main
 
+// needed to use `*testing.T`
 import "testing"
 
+// About the test function
+// - must start with `Test`
+// - takes only one argument `t *testing.T`
+// - `t` is your "hook" into the testing framework
 func TestHello(t *testing.T) {
+	// 👇 t.Run(testName, testFunction)
 	t.Run("saying 'Olá' to people", func(t *testing.T) {
 		got := Hello("meleu", "Portuguese")
 		want := "Olá, meleu"
@@ -44,6 +50,7 @@ func assertCorrectMessage(t testing.TB, got, want string) {
 	// This way, when it fails the line number reported will be in the caller.
 	t.Helper()
 	if got != want {
+		// `t.Errorf` prints a message when a test fails.
 		t.Errorf("got %q want %q", got, want)
 	}
 }

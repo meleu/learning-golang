@@ -1,13 +1,25 @@
+// all comments represent something I learned
+
+// the 'main' package becomes an executable (not sure if it's accurate)
 package main
 
+// needed to use Println
 import "fmt"
 
-const englishHelloPrefix = "Hello, "
-const spanishHelloPrefix = "Hola, "
-const frenchHelloPrefix = "Bonjour, "
-const portugueseHelloPrefix = "Olá, "
+// grouping constants
+const (
+	spanish    = "Spanish"
+	french     = "French"
+	portuguese = "Portuguese"
 
-func Hello(name string, language string) string {
+	englishHelloPrefix    = "Hello, "
+	spanishHelloPrefix    = "Hola, "
+	frenchHelloPrefix     = "Bonjour, "
+	portugueseHelloPrefix = "Olá, "
+)
+
+// public function starts with an Uppercase letter
+func Hello(name, language string) string {
 	if name == "" {
 		name = "World"
 	}
@@ -15,14 +27,15 @@ func Hello(name string, language string) string {
 	return greetingPrefix(language) + name
 }
 
-// learning about the "named return value": (prefix string)
+// - private function starts with Lowercase letter
+// - 'prefix' is a named return value
 func greetingPrefix(language string) (prefix string) {
 	switch language {
-	case "Spanish":
+	case spanish:
 		prefix = spanishHelloPrefix
-	case "French":
+	case french:
 		prefix = frenchHelloPrefix
-	case "Portuguese":
+	case portuguese:
 		prefix = portugueseHelloPrefix
 	default:
 		prefix = englishHelloPrefix
@@ -31,5 +44,5 @@ func greetingPrefix(language string) (prefix string) {
 }
 
 func main() {
-	fmt.Println(Hello("world", ""))
+	fmt.Println(Hello("World", ""))
 }
