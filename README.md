@@ -36,7 +36,7 @@ Awesome tool to rerun tests on file change: [watchexec](https://github.com/watch
 
 ```bash
 # run 'go test' when a change happens on a file ending with .go
-watchexec -e go go test
+watchexec -e go -- go test -v
 ```
 
 Local documentation:
@@ -141,3 +141,58 @@ func assertCorrectMessage(t testing.TB, actual, expected string) {
 - For helper functions, accept `testing.TB` is a good idea.
 - `t.Helper` is needed to report the caller line number when the test fails
   (not the line number in the helper function)
+
+## Integers
+
+### Testable Examples
+
+[Official article](https://go.dev/blog/examples).
+
+Here's an example:
+
+```go
+func ExampleAdd() {
+	sum := Add(1, 5)
+	fmt.Println(sum)
+	// Output: 6
+}
+```
+
+The special comment `// Output: 6` makes the example to be executed.
+
+This example also goes to the documentation of your package. You can check by
+running `godoc -http :8000` and looking for the `Integers` package.
+
+## Iteration
+
+### Golang
+
+In Go you iterate using `for`. There are **no** `while`, `do`, `until` keywords.
+
+It's usually used like other C-like languages:
+
+```go
+for i := 0; i < 5; i++ {
+	repeated += character
+}
+```
+
+Other ways of using `for` are listed here: <https://gobyexample.com/for>
+
+### Benchmarking
+
+Example:
+
+```go
+func BenchmarkRepeat(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Repeat("a")
+	}
+}
+```
+
+- `testing.B` gives you access to the (cryptic) `b.N`.
+- the benchmark code is executed `b.N` times and measures how long it takes.
+  - the amount of times shouldn't matter, the framework determine what is a "good" value.
+- run the benchmark with `go test -bench=.`
+- the results show how many times the code was executed and how many nanoseconds it took to run.
