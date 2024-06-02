@@ -207,6 +207,8 @@ func BenchmarkRepeat(b *testing.B) {
 
 ## Arrays
 
+<https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/arrays-and-slices>
+
 ### Golang
 
 Arrays can be initialized in two ways:
@@ -215,12 +217,6 @@ Arrays can be initialized in two ways:
   - example: `numbers := [5]int{1, 2, 3, 4, 5}`
 - `[...]type{value1, value2, ..., valueN}`
   - example: `numbers := [...]int{1, 2, 3, 4, 5}`
-
-There's also the [slice type](https://go.dev/doc/effective_go#slices) which
-allows us to have collections of any size. The syntax is very similar to arrays,
-just omit the size.
-
-Example: `mySlice := []int{1, 2, 3}`
 
 The `%v` placeholder print the variable in the "default" format (in this case
 an array).
@@ -242,3 +238,39 @@ func Sum(numbers [5]int) int {
 - on each iteration it returns two values: the index and the value
 - in the example we are choosing to ignore the index by using the
   `_` [blank identifier](https://go.dev/doc/effective_go#blank)
+
+## Slices
+
+### Golang
+
+The [slice type](https://go.dev/doc/effective_go#slices) allows us to have
+collections of any size. The syntax is very similar to arrays, just omit
+the size.
+
+Example: `mySlice := []int{1, 2, 3}`
+
+Checking equality of slices:
+
+```go
+import "reflect"
+
+reflect.DeepEqual(slice1, slice2)
+```
+
+Adding elements to a slice:
+
+```go
+// append() creates a new slice, therefore you need to assign the variable again
+mySlice = append(mySlice, newElement)
+
+// you can use append() to merge two slices:
+mySlice = append(mySlice, anotherSlice...)
+```
+
+### Golang testing
+
+Check the coverage with
+
+```bash
+go test -cover
+```
