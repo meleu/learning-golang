@@ -28,7 +28,15 @@ Useful config to be used in VSCode:
 ```json
 {
   "go.lintTool": "golangci-lint",
-  "go.lintFlags": ["--fast"]
+  "go.lintFlags": ["--fast"],
+  "go.coverOnSave": true,
+  "go.coverageDecorator": {
+    "type": "gutter",
+    "coveredHighlightColor": "rgba(64,128,128,0.5)",
+    "uncoveredHighlightColor": "rgba(128,64,64,0.25)",
+    "coveredGutterStyle": "blockgreen",
+    "uncoveredGutterStyle": "slashred"
+  }
 }
 ```
 
@@ -196,3 +204,41 @@ func BenchmarkRepeat(b *testing.B) {
   - the amount of times shouldn't matter, the framework determine what is a "good" value.
 - run the benchmark with `go test -bench=.`
 - the results show how many times the code was executed and how many nanoseconds it took to run.
+
+## Arrays
+
+### Golang
+
+Arrays can be initialized in two ways:
+
+- `[N]type{value1, value2, ..., valueN}`
+  - example: `numbers := [5]int{1, 2, 3, 4, 5}`
+- `[...]type{value1, value2, ..., valueN}`
+  - example: `numbers := [...]int{1, 2, 3, 4, 5}`
+
+There's also the [slice type](https://go.dev/doc/effective_go#slices) which
+allows us to have collections of any size. The syntax is very similar to arrays,
+just omit the size.
+
+Example: `mySlice := []int{1, 2, 3}`
+
+The `%v` placeholder print the variable in the "default" format (in this case
+an array).
+
+Let's check the `range` instruction:
+
+```go
+func Sum(numbers [5]int) int {
+	sum := 0
+	// numbers is the array given as argument
+	for _, number := range numbers {
+		sum += number
+	}
+	return sum
+}
+```
+
+- `range` let you iterate over an array
+- on each iteration it returns two values: the index and the value
+- in the example we are choosing to ignore the index by using the
+  `_` [blank identifier](https://go.dev/doc/effective_go#blank)
