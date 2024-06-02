@@ -274,3 +274,81 @@ Check the coverage with
 ```bash
 go test -cover
 ```
+
+## Structs, Methods and Interfaces
+
+### Golang
+
+```go
+// declaring a struct
+type Rectangle struct {
+	Width  float64
+	Height float64
+}
+
+// declaring a method for a struct
+func (r Rectangle) Area() float64 {
+	return r.Height * r.Width
+}
+```
+
+An interesting thing about interfaces in Go (which makes me remember Duck Typing):
+**interface resolution is implicit**.
+
+Here's an example of an interface:
+
+```go
+type Shape interface {
+	Area() float64
+}
+```
+
+Once this 👆 is declared **any** struct witha method called `Area()` that returns
+a `float64` is automatically considered a `Shape`.
+
+We don't need to explicitly say "My type Foo implements interface Bar".
+
+### Golang testing
+
+I learned about Table Driven Tests. It's useful but not that easy to read
+(without some training).
+
+Here's an example:
+
+```go
+func TestArea(t *testing.T) {
+	// using Table Drive Tests <https://go.dev/wiki/TableDrivenTests>
+	areaTests := []struct {
+		name    string
+		shape   Shape
+		hasArea float64
+	}{
+		{
+			name:    "Rectangle",
+			shape:   Rectangle{Width: 12, Height: 6},
+			hasArea: 72.0,
+		},
+		{
+			name:    "Circle",
+			shape:   Circle{Radius: 10},
+			hasArea: 314.1592653589793,
+		},
+		{
+			name:    "Triangle",
+			shape:   Triangle{Base: 12, Height: 6},
+			hasArea: 36.0,
+		},
+	}
+
+	for _, tt := range areaTests {
+		// using tt.name to use it as the `t.Run` test name
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.shape.Area()
+			if got != tt.hasArea {
+				// the `%#v` format string prints the struct with values in its fields
+				t.Errorf("%#v got %g; want %g", tt.shape, got, tt.hasArea)
+			}
+		})
+	}
+}
+```
