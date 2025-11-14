@@ -10,19 +10,19 @@ func Sum(numbers []int) int {
 	return sum
 }
 
+// SumAll takes a variable number of slices of integers and returns a slice containing
+// the sum of each provided slice. Each element in the returned slice corresponds to
+// the sum of the respective input slice.
+//
+// Example:
+//
+//	SumAll([]int{1,2}, []int{0,9}) // returns []int{3, 9}
 func SumAll(numbersToSum ...[]int) []int {
 	var sums []int
 
 	for _, numbers := range numbersToSum {
 		sums = append(sums, Sum(numbers))
 	}
-
-	// lengthOfNumbers := len(numbersToSum)
-	// sums := make([]int, lengthOfNumbers)
-	//
-	// for i, numbers := range numbersToSum {
-	// 	sums[i] = Sum(numbers)
-	// }
 
 	return sums
 }

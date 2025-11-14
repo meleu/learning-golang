@@ -1,7 +1,7 @@
 package main
 
 import (
-	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -29,7 +29,7 @@ func TestSumAll(t *testing.T) {
 	actual := SumAll([]int{1, 2}, []int{0, 1, 9})
 	expected := []int{3, 10}
 
-	if !reflect.DeepEqual(actual, expected) {
+	if !slices.Equal(actual, expected) {
 		t.Errorf("\n  actual: %v\nexpected: %v", actual, expected)
 	}
 }
@@ -37,7 +37,7 @@ func TestSumAll(t *testing.T) {
 func TestSumAllTails(t *testing.T) {
 	assertEqualSums := func(t testing.TB, actual, expected []int) {
 		t.Helper()
-		if !reflect.DeepEqual(actual, expected) {
+		if !slices.Equal(actual, expected) {
 			t.Errorf("\n  actual: %v\nexpected: %v", actual, expected)
 		}
 	}
