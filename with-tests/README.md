@@ -92,7 +92,7 @@ const (
 )
 ```
 
-#### Golang testing
+### Golang testing
 
 - file name must be `${something}_test.go`
 - `import "testing"`
@@ -429,7 +429,23 @@ go install github.com/kisielk/errcheck@latest
 errcheck .
 ```
 
-#### Golang testing
+#### Implement the to-string method
+
+Your type just need to adhere to the [Stringer interface](https://pkg.go.dev/fmt#Stringer)
+
+```go
+// example:
+type Quotation struct {
+ quote  string
+ author string
+}
+
+func (q Quotation) String() string {
+ return fmt.Sprintf("%s says, %q.", q.author, q.quote)
+}
+```
+
+### Golang testing
 
 Use `t.Fatal` when you want to interrupt the current test and don't need to
 go on with more assertions.
@@ -497,3 +513,9 @@ const (
   ErrWordExists = DictionaryErr("cannot add word because it already exists")
 )
 ```
+
+## Dependency Injection
+
+One of the utilities of Dependency Injection is to facilitate testing...
+
+## Mocking
