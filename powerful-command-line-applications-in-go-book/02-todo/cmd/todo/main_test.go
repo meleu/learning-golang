@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -47,8 +48,23 @@ func TestTodoCLI(t *testing.T) {
 
 	cmdPath := filepath.Join(dir, binName)
 
-	t.Run("add a new task", func(t *testing.T) {
-		cmd := exec.Command(cmdPath, "-task", newTask)
+	t.Run("add a new task from arguments", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-add", newTask)
+		if err := cmd.Run(); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	newTask2 := "test task number 2"
+	t.Run("add a new task from stdin", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-add")
+		cmdStdin, err := cmd.StdinPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+		io.WriteString(cmdStdin, newTask2)
+		cmdStdin.Close()
+
 		if err := cmd.Run(); err != nil {
 			t.Fatal(err)
 		}
@@ -61,7 +77,7 @@ func TestTodoCLI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		want := fmt.Sprintf("[ ] 1: %s\n", newTask)
+		want := fmt.Sprintf("[ ] 1: %s\n[ ] 2: %s\n", newTask, newTask2)
 		got := string(out)
 
 		if got != want {
@@ -81,7 +97,7 @@ func TestTodoCLI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		want := fmt.Sprintf("[X] 1: %s\n", newTask)
+		want := fmt.Sprintf("[X] 1: %s\n[ ] 2: %s\n", newTask, newTask2)
 		got := string(out)
 
 		if got != want {

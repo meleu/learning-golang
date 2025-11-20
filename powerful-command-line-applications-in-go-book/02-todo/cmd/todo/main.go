@@ -1,22 +1,32 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
-
+	"strings"
 	"todo"
 )
 
 const TodoFilename = ".todo.json"
 
+const usage = `
+Developed by meleu
+Copyright 2025
+
+Usage information:
+`
+
 func main() {
 	// Parsing command line flags
-	task := flag.String("task", "", "Task to be included in the ToDo list")
+	// task := flag.String("task", "", "Task to be included in the ToDo list")
+	add := flag.Bool("add", false, "Add task to the ToDo list")
 	list := flag.Bool("list", false, "List all tasks")
 	complete := flag.Int("complete", 0, "Item to be completed")
-	flag.Usage = usage
+	flag.Usage = func() { fmt.Print(usage); flag.PrintDefaults() }
 	flag.Parse()
 
 	todoList := &todo.TodoList{}
@@ -30,8 +40,8 @@ func main() {
 		fmt.Print(todoList)
 	case *complete > 0:
 		completeTask(todoList, *complete)
-	case *task != "":
-		addTask(todoList, *task)
+	case *add:
+		addTask(todoList)
 	default:
 		log.Fatal("Invalid option")
 	}
@@ -46,16 +56,32 @@ func completeTask(list *todo.TodoList, i int) {
 	}
 }
 
-func addTask(list *todo.TodoList, task string) {
+func addTask(list *todo.TodoList) {
+	task, err := readTask(os.Stdin, flag.Args()...)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
 	list.Add(task)
 	if err := list.Save(TodoFilename); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func usage() {
-	fmt.Fprintf(flag.CommandLine.Output(), "%s tool. Developed by meleu\n", os.Args[0])
-	fmt.Fprintln(flag.CommandLine.Output(), "Copyright 2025")
-	fmt.Fprintln(flag.CommandLine.Output(), "Usage information:")
-	flag.PrintDefaults()
+func readTask(r io.Reader, args ...string) (string, error) {
+	if len(args) > 0 {
+		return strings.Join(args, " "), nil
+	}
+
+	s := bufio.NewScanner(r)
+	s.Scan()
+	if err := s.Err(); err != nil {
+		return "", err
+	}
+	if len(s.Text()) == 0 {
+		return "", fmt.Errorf("task cannot be blank")
+	}
+
+	return s.Text(), nil
 }
