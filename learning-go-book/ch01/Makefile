@@ -2,6 +2,9 @@
 
 .PHONY:fmt vet build
 
+test:
+	go test ./...
+
 fmt:
 	go fmt ./...
 
