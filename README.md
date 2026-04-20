@@ -357,7 +357,7 @@ type Shape interface {
 }
 ```
 
-Once this 👆 is declared **any** struct witha method called `Area()` that returns
+Once this 👆 is declared **any** struct with a method called `Area()` returning
 a `float64` is automatically considered a `Shape`.
 
 We don't need to explicitly say "My type Foo implements interface Bar".
