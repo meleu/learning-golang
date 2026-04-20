@@ -50,15 +50,19 @@ watchexec -e go -- go test -v
 Local documentation:
 
 ```bash
-# installing local documentation
-go install golang.org/x/tools/cmd/godoc@latest
+# There are two methods:
 
-# NOTE: sometimes godoc won't be in your path.
-# in my case it went to `~/.asdf/` structure and I created an alias:
-alias godoc=$(find $HOME/.asdf/installs/golang -type f -path '*packages/bin/godoc')
+# 1. just run `go doc <PKGNAME>`
+# example: check `fmt` documentation directly on the terminal
+go doc fmt
+# the output is massive...
 
-# now you can launch the local documentation server
-godoc -http :8000
+# 2. using `pkgsite`
+# a) install the pkgsite command, with the official package viewing website
+go install golang.org/x/pkgsite/cmd/pkgsite@latest
+
+# b) run it on your pkg's dir
+pkgsite -open .
 ```
 
 #### Golang basics
@@ -81,17 +85,17 @@ godoc -http :8000
 
 ```go
 func greetingPrefix(language string) (prefix string) {
-	switch language {
-	case spanish:
-		prefix = spanishHelloPrefix
-	case french:
-		prefix = frenchHelloPrefix
-	case portuguese:
-		prefix = portugueseHelloPrefix
-	default:
-		prefix = englishHelloPrefix
-	}
-	return
+ switch language {
+ case spanish:
+  prefix = spanishHelloPrefix
+ case french:
+  prefix = frenchHelloPrefix
+ case portuguese:
+  prefix = portugueseHelloPrefix
+ default:
+  prefix = englishHelloPrefix
+ }
+ return
 }
 ```
 
@@ -99,14 +103,14 @@ func greetingPrefix(language string) (prefix string) {
 
 ```go
 const (
-	spanish    = "Spanish"
-	french     = "French"
-	portuguese = "Portuguese"
+ spanish    = "Spanish"
+ french     = "French"
+ portuguese = "Portuguese"
 
-	englishHelloPrefix    = "Hello, "
-	spanishHelloPrefix    = "Hola, "
-	frenchHelloPrefix     = "Bonjour, "
-	portugueseHelloPrefix = "Olá, "
+ englishHelloPrefix    = "Hello, "
+ spanishHelloPrefix    = "Hola, "
+ frenchHelloPrefix     = "Bonjour, "
+ portugueseHelloPrefix = "Olá, "
 )
 ```
 
@@ -116,38 +120,38 @@ const (
 - `import "testing"`
 - the test function must start with `Test`
 - test function takes only one argument `t *testing.T` (it's your "hook" into the testing framework)
-- `t.Errorf` prints a message when a test fails.
+- `t.Errorf` mark a test as failed and prints a formatted message.
 - `%q` means "string surrounded with double quotes", in the string format context
 - subtests go in `t.Run("test name", testFunction)`. Example:
 
 ```go
 func TestHello(t *testing.T) {
   // 👇 t.Run(testName, testFunction)
-	t.Run("say hello to people", func(t *testing.T) {
-		actual := Hello("Chris")
-		expected := "Hello, Chris!"
-		assertCorrectMessage(t, actual, expected)
-	})
+ t.Run("say hello to people", func(t *testing.T) {
+  actual := Hello("Chris")
+  expected := "Hello, Chris!"
+  assertCorrectMessage(t, actual, expected)
+ })
 
   // 👇 t.Run(testName, testFunction)
-	t.Run("say 'Hello, World!' when passing empty string", func(t *testing.T) {
-		actual := Hello("")
-		expected := "Hello, World!"
-		assertCorrectMessage(t, actual, expected)
-	})
+ t.Run("say 'Hello, World!' when passing empty string", func(t *testing.T) {
+  actual := Hello("")
+  expected := "Hello, World!"
+  assertCorrectMessage(t, actual, expected)
+ })
 }
 
 // comments about this helper function right after this codeblock
 func assertCorrectMessage(t testing.TB, actual, expected string) {
-	t.Helper() // <-- pra que isso?
-	if actual != expected {
-		t.Errorf("expected: %q; actual: %q", expected, actual)
-	}
+ t.Helper() // <-- pra que isso?
+ if actual != expected {
+  t.Errorf("expected: %q; actual: %q", expected, actual)
+ }
 }
 ```
 
-- For helper functions, accept `testing.TB` is a good idea.
-- `t.Helper` is needed to report the caller line number when the test fails
+- For testing helper functions, use `testing.TB` so you can use `t.Helper`
+- `t.Helper` is useful to report the caller line number when the test fails
   (not the line number in the helper function)
 
 ## Integers
@@ -160,20 +164,19 @@ Here's an example:
 
 ```go
 func ExampleAdd() {
-	sum := Add(1, 5)
-	fmt.Println(sum)
-	// Output: 6
+ sum := Add(1, 5)
+ fmt.Println(sum)
+ // Output: 6
 }
 ```
 
 The special comment `// Output: 6` makes the example to be executed.
 
-This example also goes to the documentation of your package. You can check by
-running `godoc -http :8000` and looking for the `Integers` package.
-
 ## Iteration
 
 ### Golang
+
+#### for Loops
 
 In Go you iterate using `for`. There are **no** `while`, `do`, `until` keywords.
 
@@ -181,24 +184,50 @@ It's usually used like other C-like languages:
 
 ```go
 for i := 0; i < 5; i++ {
-	repeated += character
+ repeated += character
 }
 ```
 
 Other ways of using `for` are listed here: <https://gobyexample.com/for>
 
-### Benchmarking
+#### string and strings.Builder
 
-Example:
+Strings are immutablee, therefore each concatenation involves copying memory to accommodate the new string (which impacts performance).
+
+The standard library provides the `strings.Builder` type. It implements a `WriteString` method that can be used to concatenate strings. Like this:
 
 ```go
-func BenchmarkRepeat(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Repeat("a")
-	}
+const repeatCount = 5
+
+func Repeat(character string) string {
+ var repeated strings.Builder
+ for range repeatCount {
+  repeated.WriteString(character)
+ }
+ return repeated.String()
+}
+
+```
+
+```
+```
+
+### Benchmarking
+
+Typical structure of a benchmark:
+
+```go
+func Benchmark(b *testing.B) {
+  // ... setup...
+ for b.Loop() {
+  // ... code to measure...
+ }
+  // ... cleanup...
 }
 ```
 
+- official documentation: <https://golang.org/pkg/testing/#hdr-Benchmarks>
+- `b.Loop()` returns true as long as the benchmark should continue running.
 - `testing.B` gives you access to the (cryptic) `b.N`.
 - the benchmark code is executed `b.N` times and measures how long it takes.
   - the amount of times shouldn't matter, the framework determine what is a "good" value.
@@ -225,12 +254,12 @@ Let's check the `range` instruction:
 
 ```go
 func Sum(numbers [5]int) int {
-	sum := 0
-	// numbers is the array given as argument
-	for _, number := range numbers {
-		sum += number
-	}
-	return sum
+ sum := 0
+ // numbers is the array given as argument
+ for _, number := range numbers {
+  sum += number
+ }
+ return sum
 }
 ```
 
@@ -243,21 +272,15 @@ func Sum(numbers [5]int) int {
 
 ### Golang
 
+#### Slices
+
 The [slice type](https://go.dev/doc/effective_go#slices) allows us to have
 collections of any size. The syntax is very similar to arrays, just omit
 the size.
 
 Example: `mySlice := []int{1, 2, 3}`
 
-Checking equality of slices:
-
-```go
-import "reflect"
-
-reflect.DeepEqual(slice1, slice2)
-```
-
-Adding elements to a slice:
+#### Adding elements to a slice
 
 ```go
 // append() creates a new slice, therefore you need to assign the variable again
@@ -265,6 +288,37 @@ mySlice = append(mySlice, newElement)
 
 // you can use append() to merge two slices:
 mySlice = append(mySlice, anotherSlice...)
+```
+
+#### Slicing slices
+
+Slices can be sliced with `slice[low:high]`. If you omit the value on one of
+the sides of the `:` it captures everything to that side of it.
+
+Example: `number[1:]` means "take from 1 to the end".
+
+#### Checking equality of slices
+
+Starting from Go 1.21, the slices standard package has [the `slices.Equal`](https://pkg.go.dev/slices#Equal)
+function to do simple shallow compare on slices.
+
+```go
+func TestSumAll(t *testing.T) {
+ got := SumAll([]int{1, 2}, []int{0, 9})
+ want := []int{3, 9}
+
+ if !slices.Equal(got, want) {
+  t.Errorf("got %v want %v", got, want)
+ }
+}
+```
+
+Before Go 1.21, the text was using [the `reflect.DeepEqual`](https://pkg.go.dev/reflect#DeepEqual) function.
+
+```go
+import "reflect"
+
+reflect.DeepEqual(slice1, slice2)
 ```
 
 ### Golang testing
@@ -282,13 +336,13 @@ go test -cover
 ```go
 // declaring a struct
 type Rectangle struct {
-	Width  float64
-	Height float64
+ Width  float64
+ Height float64
 }
 
 // declaring a method for a struct
 func (r Rectangle) Area() float64 {
-	return r.Height * r.Width
+ return r.Height * r.Width
 }
 ```
 
@@ -299,7 +353,7 @@ Here's an example of an interface:
 
 ```go
 type Shape interface {
-	Area() float64
+ Area() float64
 }
 ```
 
@@ -317,38 +371,38 @@ Here's an example:
 
 ```go
 func TestArea(t *testing.T) {
-	// using Table Drive Tests <https://go.dev/wiki/TableDrivenTests>
-	areaTests := []struct {
-		name    string
-		shape   Shape
-		hasArea float64
-	}{
-		{
-			name:    "Rectangle",
-			shape:   Rectangle{Width: 12, Height: 6},
-			hasArea: 72.0,
-		},
-		{
-			name:    "Circle",
-			shape:   Circle{Radius: 10},
-			hasArea: 314.1592653589793,
-		},
-		{
-			name:    "Triangle",
-			shape:   Triangle{Base: 12, Height: 6},
-			hasArea: 36.0,
-		},
-	}
+ // using Table Drive Tests <https://go.dev/wiki/TableDrivenTests>
+ areaTests := []struct {
+  name    string
+  shape   Shape
+  hasArea float64
+ }{
+  {
+   name:    "Rectangle",
+   shape:   Rectangle{Width: 12, Height: 6},
+   hasArea: 72.0,
+  },
+  {
+   name:    "Circle",
+   shape:   Circle{Radius: 10},
+   hasArea: 314.1592653589793,
+  },
+  {
+   name:    "Triangle",
+   shape:   Triangle{Base: 12, Height: 6},
+   hasArea: 36.0,
+  },
+ }
 
-	for _, tt := range areaTests {
-		// using tt.name to use it as the `t.Run` test name
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.shape.Area()
-			if got != tt.hasArea {
-				// the `%#v` format string prints the struct with values in its fields
-				t.Errorf("%#v got %g; want %g", tt.shape, got, tt.hasArea)
-			}
-		})
-	}
+ for _, tt := range areaTests {
+  // using tt.name to use it as the `t.Run` test name
+  t.Run(tt.name, func(t *testing.T) {
+   got := tt.shape.Area()
+   if got != tt.hasArea {
+    // the `%#v` format string prints the struct with values in its fields
+    t.Errorf("%#v got %g; want %g", tt.shape, got, tt.hasArea)
+   }
+  })
+ }
 }
 ```
