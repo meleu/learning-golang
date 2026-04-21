@@ -156,6 +156,8 @@ func assertCorrectMessage(t testing.TB, actual, expected string) {
 
 ## Integers
 
+- <https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/integers>
+
 ### Testable Examples
 
 [Official article](https://go.dev/blog/examples).
@@ -173,6 +175,8 @@ func ExampleAdd() {
 The special comment `// Output: 6` makes the example to be executed.
 
 ## Iteration
+
+- <https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/iteration>
 
 ### Golang
 
@@ -192,7 +196,7 @@ Other ways of using `for` are listed here: <https://gobyexample.com/for>
 
 #### string and strings.Builder
 
-Strings are immutablee, therefore each concatenation involves copying memory to accommodate the new string (which impacts performance).
+Strings are immutable, therefore each concatenation involves copying memory to accommodate the new string (which impacts performance).
 
 The standard library provides the `strings.Builder` type. It implements a `WriteString` method that can be used to concatenate strings. Like this:
 
@@ -266,6 +270,8 @@ func Sum(numbers [5]int) int {
 
 ## Slices
 
+- <https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/arrays-and-slices>
+
 ### Golang
 
 #### Slices
@@ -326,6 +332,8 @@ go test -cover
 ```
 
 ## Structs, Methods and Interfaces
+
+- <https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/structs-methods-and-interfaces>
 
 ### Golang
 
@@ -404,6 +412,8 @@ func TestArea(t *testing.T) {
 ```
 
 ## Pointers & Errors
+
+- <https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/pointers-and-errors>
 
 ### Golang
 
@@ -491,3 +501,31 @@ Creating errors:
 
 - `errors.New`: for static messages (useful for custom errors definitions)
 - `fmt.Errorf("...: %w", err)`: useful for when you need to wrap/format
+
+Interesting reading about constant errors: <https://dave.cheney.net/2016/04/07/constant-errors>
+
+## Maps
+
+- <https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/maps>
+
+### Constant Errors
+
+Useful technique to make errors immutable:
+
+```go
+// making the errors immutable and more reusable.
+// See: https://dave.cheney.net/2016/04/07/constant-errors
+const (
+  ErrNotFound         = DictionaryErr("could not find the word you were looking for")
+  ErrWordExists       = DictionaryErr("this word already has a definition")
+  ErrWordDoesNotExist = DictionaryErr("this word does not exist in the dictionary")
+)
+
+type DictionaryErr string
+
+func (e DictionaryErr) Error() string {
+  return string(e)
+}
+```
+
+Another useful reading: <https://go.dev/blog/go1.13-errors>
