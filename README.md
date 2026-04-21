@@ -206,10 +206,6 @@ func Repeat(character string) string {
  }
  return repeated.String()
 }
-
-```
-
-```
 ```
 
 ### Benchmarking
@@ -406,3 +402,92 @@ func TestArea(t *testing.T) {
  }
 }
 ```
+
+## Pointers & Errors
+
+### Golang
+
+#### Pointer receivers
+
+Go passes arguments by value. This includes the receiver of a method. So, if
+your method needs to mutate state, you need to use pointers.
+
+Example:
+
+```go
+// example where the wallet's balance needs to be updated
+func (w *Wallet) Deposit(amount Bitcoin) { w.balance += amount}
+```
+
+- It's usual to always use pointers for receivers, for the sake of consistency.
+- Auto-derefenrencing:
+  - you write `w.balance`, not `(*w).balance` (although both are valid)
+  - similarly, you can call `wallet.Deposit(...)`, not `&wallet.Deposit(...)`
+- other reasons to use pointers:
+  - large structs (avoid copying)
+  - types that must be shared (e.g.: DB pools, mutexes)
+
+#### Named types from primitives
+
+Example:
+
+```go
+type Bitcoin int
+```
+
+It's not a typedef or alias, it's a distinct type. The compiler refuses to mix
+`Bitcoin` and `int` without explicit conversion.
+
+Example:
+
+- `var b Bitcoin = 5` compiles
+- `var b Bitcoin = someInt` ERROR! The value must be converted with `Bitcoin(someInt)`
+
+It's useful to get domain meaning and a type to hang methods. This way we can
+make "primitive-like" types to satisfy interfaces.
+
+**Note**: as `Bitcoin` has the `int` type, it can use the underlying `int`
+operators, like `+`, `-`, `<`, `>`. That's why `w.balance += amount` works.
+
+#### The Stringer interface
+
+The go-way to declare a `toString()` method is by defining a `String()` method
+that returns a `string`.
+
+```go
+func (b Bitcoin) String() string {
+  return fmt.Sprintf("%d BTC", b)
+}
+```
+
+This is enough to satisfy the `Stringer` interface, and  now we can do this:
+
+```go
+bitcoint := Bitcoin(10)
+fmt.Printf("%s", bitcoin)
+// => 10 BTC
+```
+
+#### Errors
+
+Go has no "Exceptions". Functions signal failure by returning an `error` as the
+last value, and the caller expcitly checks it.
+
+The `error` "type" is actually an interface: `interface{ Error() string}`.
+Therefore any time with an `Error() string` method can be considered an `error`.
+
+**Errors are values**. It's usual to declare them once as a package var, using
+the `Err` prefix (e.g.: `ErrInsufficientFunds`). Callers can compare with
+`err == ErrSomething` or `errors.Is(err, ErrSomething`
+
+Although `err.Error()` returns a string, your tests should not check this string,
+use the `ErrXxx` instead.
+
+If error is `nil`, it means success. Return `nil` on the happy path. Callers
+check success with `if err != nil { erroHandling... }`. You'll see this a lot
+in Go code.
+
+Creating errors:
+
+- `errors.New`: for static messages (useful for custom errors definitions)
+- `fmt.Errorf("...: %w", err)`: useful for when you need to wrap/format
